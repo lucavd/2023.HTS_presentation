@@ -1,0 +1,19 @@
+A
+devo generare un dataset di dati HTS in R per for fare delle simulazioni per testare varie metodiche di analisi. Il dataset deve avere le seguenti caratteristiche:
+
+---
+1- 500 composti
+2- 3 replicati
+3- 5 misure (measurements) con media, deviazione standard diverse
+4- 3 misure su 5 non devono avere una distribuzione normale (scegliele tu a caso)
+5- nelle 3 repliche di ogni composto, le misure devono essere simili tra loro (entro 3 deviazioni standard)
+6- il 5% dei composti deve essere positivo (activity = 1), gli altri negativi (activity = 0)
+7- i composti con activity = 1 devono avere min =1 e max = 5 misure che sono mediamente piu'alte dei composti con activity = 0
+8- il 20% dei composti devono avere una variabilita' maggiore di 5 volte gli altri
+9- aggiungi ai 500 composti 3 controlli positivi che hanno tutte le 5 misure mediamente piu'alte dei composti con activity = 0
+10- aggiungi ai 500 composti 5 controlli negativi che hanno tutte le 5 misure mediamente piu'basse dei composti con activity = 1
+---
+
+Tutte le 10 caratteristiche devono essere rispettate nel dataset finale. Dividi il codice in modo che io veda che calcoli hai fatto per implementarle singolarmente.
+Fammi un unico script che crei un dataset finale che comprenda le variabili compoud_id, replicate, activity, misure da 1 a 5 che devono avere tutte le 10 caratteristiche. Metti i nomi delle variabili e i commenti al codice in inglese.
+
