@@ -264,6 +264,7 @@ mean_auc_xgb
 
 # download the latest Java SE JDK
 # https://www.oracle.com/java/technologies/downloads/#jdk21-windows
+# use a clean session of R (Restart R)
 
 # Load the necessary package
 library(h2o)
@@ -287,14 +288,32 @@ automl_models <- h2o.automl(x = predictors,
                             nfolds = 10,
                             sort_metric = 'AUC')
 
+
+# Leaderboard
+lb <- h2o.get_leaderboard(object = automl_models, extra_columns = "ALL")
+
 # Extract the best model
 best_model <- automl_models@leader
+
+# this is equivalent to
+best_model <- h2o.get_best_model(automl_models)
+
+# Get the best model using a non-default metric
+best_model_logloss <- h2o.get_best_model(automl_models, criterion = "logloss")
+
+# Get the best XGBoost model using default sort metric
+xgb <- h2o.get_best_model(automl_models, algorithm = "xgboost")
+
+# Get the best XGBoost model, ranked by logloss
+xgb_logloss <- h2o.get_best_model(automl_models, algorithm = "xgboost", criterion = "logloss")
 
 # Extract AUC of the best model on cross-validation
 auc_automl <- h2o.auc(h2o.performance(best_model, xval = TRUE))
 
 # Shut down the h2o cluster
 h2o.shutdown(prompt = FALSE)
+
+
 
 
 
