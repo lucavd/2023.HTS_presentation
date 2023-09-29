@@ -17,3 +17,21 @@ devo generare un dataset di dati HTS in R per for fare delle simulazioni per tes
 Tutte le 10 caratteristiche devono essere rispettate nel dataset finale. Dividi il codice in modo che io veda che calcoli hai fatto per implementarle singolarmente.
 Fammi un unico script che crei un dataset finale che comprenda le variabili compoud_id, replicate, activity, misure da 1 a 5 che devono avere tutte le 10 caratteristiche. Metti i nomi delle variabili e i commenti al codice in inglese.
 
+B - Classificazione AUROC
+
+Adesso dobbiamo provare vari metodi di classificazione. DObbiamo testare vari metodi in gradi di classificare correttamente "activity" partendo dalle 5 misure, tenendo conto di controlli positivi e negativi. Quando sei pronto dimmelo che ti dico i metodi che vorrei confrontare tramite AUC della ROC.
+
+Metodi di classificazione 
+1- Regressione logistica
+2- Regressione logistica non parametrica (con spline e kernel)
+3- GAM
+4- GLMM
+5- Random Forest
+6- XGBoost
+7- AutoXgboost (con il pacchetto 'autoxgboost')
+8- AutoML con il pacchetto 'h2o'
+
+mi raccomando, non inventarti funzioni o metodi di cui non sei certo. Se non lo sai fare, dimmi semplicemente "questo metodo non lo so implementare"
+
+Aspetta i miei comandi prima di inziare, metti tutto in un unico script per parametro calcolato.
+
