@@ -4,6 +4,26 @@ library(pROC)
 library(caret)
 
 
+# Bootstrap function for AUC 95%CI ----------------------------------------
+
+bootstrap_auc <- function(auc_vec, n_bootstraps = 1000, alpha = 0.05) {
+  bootstrapped_auc <- numeric(n_bootstraps)
+  n = length(auc_vec)
+  
+  for(i in 1:n_bootstraps) {
+    # Eseguire il campionamento con sostituzione
+    resampled_indices <- sample(1:n, n, replace = TRUE)
+    bootstrapped_auc[i] <- mean(auc_vec[resampled_indices])
+  }
+  
+  # Calcolare gli intervalli di confidenza
+  ci_lower <- quantile(bootstrapped_auc, alpha / 2)
+  ci_upper <- quantile(bootstrapped_auc, 1 - alpha / 2)
+  
+  return(data.frame(CI_lower = ci_lower, CI_upper = ci_upper))
+}
+
+
 
 # 1. GLM ------------------------------------------------------------------
 
@@ -63,9 +83,13 @@ for(i in seq_along(folds)){
 # Compute average AUC across all folds
 mean_auc_nplr_spline <- mean(auc_nplr_spline)
 
-# Display the average AUC
-print(paste("Average AUC for Non-Parametric Logistic Regression with Spline: ", round(mean_auc_nplr_spline, 3)))
+ic_auc_nplr_spline <- bootstrap_auc(auc_nplr_spline)
 
+# Display the average AUC
+print(paste("Average AUC for Non-Parametric Logistic Regression with Spline: ",
+            round(mean_auc_nplr_spline, 2), "[", round(ic_auc_nplr_spline$CI_lower, 2),
+            "-",
+            round(ic_auc_nplr_spline$CI_upper, 2), "]"))
 
 
 # GAM ---------------------------------------------------------------------
@@ -105,7 +129,14 @@ for(i in seq_along(folds)) {
 # Average AUC over the 10 folds
 mean_auc_gam <- mean(auc_gam)
 
-mean_auc_gam
+ic_auc_gam <- bootstrap_auc(auc_gam)
+
+# Display the average AUC
+print(paste("Average AUC for GAM: ",
+            round(mean_auc_gam, 2), "[", round(ic_auc_gam$CI_lower, 2),
+            "-",
+            round(ic_auc_gam$CI_upper, 2), "]"))
+
 
 # GLMM --------------------------------------------------------------------
 
@@ -144,7 +175,13 @@ for(i in seq_along(folds)){
 # Average AUC over the 10 folds (omitting failed predictions)
 mean_auc_glmm <- mean(auc_glmm, na.rm = TRUE)
 
-mean_auc_glmm
+ic_auc_glmm <- bootstrap_auc(auc_glmm)
+
+# Display the average AUC
+print(paste("Average AUC for GAM: ",
+            round(mean_auc_glmm, 2), "[", round(ic_auc_glmm$CI_lower, 2),
+            "-",
+            round(ic_auc_glmm$CI_upper, 2), "]"))
 
 
 # Random Forest -----------------------------------------------------------
@@ -183,6 +220,14 @@ mean_auc_rf <- mean(auc_rf)
 
 mean_auc_rf
 
+ic_auc_rf <- bootstrap_auc(auc_rf)
+
+# Display the average AUC
+print(paste("Average AUC for RF: ",
+            round(mean_auc_rf, 2), "[", round(ic_auc_rf$CI_lower, 2),
+            "-",
+            round(ic_auc_rf$CI_upper, 2), "]"))
+
 # Title: Random Forest Classification with ranger
 
 # Load the ranger package
@@ -216,6 +261,14 @@ for(i in seq_along(folds)){
 mean_auc_rf_ranger <- mean(auc_rf_ranger)
 
 mean_auc_rf_ranger
+
+ic_auc_rf_ranger<- bootstrap_auc(auc_rf_ranger)
+
+# Display the average AUC
+print(paste("Average AUC for RF - Ranger: ",
+            round(mean_auc_rf_ranger, 2), "[", round(ic_auc_rf_ranger$CI_lower, 2),
+            "-",
+            round(ic_auc_rf_ranger$CI_upper, 2), "]"))
 
 # xgboost -----------------------------------------------------------------
 
@@ -256,7 +309,13 @@ for(i in seq_along(folds)){
 # Average AUC over the 10 folds
 mean_auc_xgb <- mean(auc_xgb)
 
-mean_auc_xgb
+ic_auc_xgb<- bootstrap_auc(auc_xgb)
+
+# Display the average AUC
+print(paste("Average AUC for RF - Ranger: ",
+            round(mean_auc_xgb, 2), "[", round(ic_auc_xgb$CI_lower, 2),
+            "-",
+            round(ic_auc_xgb$CI_upper, 2), "]"))
 
 # autoML -------------------------------------------------------------
 
@@ -265,6 +324,7 @@ mean_auc_xgb
 # download the latest Java SE JDK
 # https://www.oracle.com/java/technologies/downloads/#jdk21-windows
 # use a clean session of R (Restart R)
+source("R/01-data_generation.R")
 
 # Load the necessary package
 library(h2o)
@@ -309,6 +369,10 @@ xgb_logloss <- h2o.get_best_model(automl_models, algorithm = "xgboost", criterio
 
 # Extract AUC of the best model on cross-validation
 auc_automl <- h2o.auc(h2o.performance(best_model, xval = TRUE))
+
+sens_automl <- h2o.sensitivity(h2o.performance(best_model, xval = TRUE))
+
+spec_automl <- h2o.specificity(h2o.performance(best_model, xval = TRUE))
 
 # Shut down the h2o cluster
 h2o.shutdown(prompt = FALSE)
