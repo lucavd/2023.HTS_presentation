@@ -68,3 +68,47 @@ ggplot(melted_final_dataset, aes(x = value, fill = measure_type)) +
 
 
 
+# ROC GRAPH Logistic regression -------------------------------------------
+
+library(ROCR)
+library(ggplot2)
+library(dplyr)
+
+# Preallocate list to store ROC values
+list_roc_values <- list()
+
+for (i in seq_along(folds)) {
+  # Subset the data based on the folds
+  train_data <- final_dataset[-folds[[i]],]
+  test_data <- final_dataset[folds[[i]],]
+  
+  # Fit logistic regression model
+  logistic_model <- glm(activity ~ measure1 + measure2 + measure3 + measure4 + measure5, 
+                        data = train_data, 
+                        family = binomial())
+  
+  # Make predictions on the test set
+  pred_probs <- predict(logistic_model, newdata = test_data, type = "response")
+  
+  # Compute ROC values
+  pred_obj <- prediction(pred_probs, test_data$activity)
+  perf_obj <- performance(pred_obj, measure = "tpr", x.measure = "fpr")
+  
+  # Store TPR and FPR
+  list_roc_values[[i]] <- data.frame(TPR = unlist(perf_obj@y.values), FPR = unlist(perf_obj@x.values))
+}
+
+# Combine all TPR and FPR
+all_roc_values <- do.call(rbind, list_roc_values)
+
+# Compute mean and 95% CI
+mean_roc <- all_roc_values %>% group_by(FPR) %>% summarise(Mean_TPR = mean(TPR), .groups = 'drop')
+ci_roc <- all_roc_values %>% group_by(FPR) %>% summarise(CI_low = quantile(TPR, 0.025), CI_high = quantile(TPR, 0.975), .groups = 'drop')
+
+# Plotting
+ggplot(data = mean_roc, aes(x = FPR, y = mean_roc$Mean_TPR)) +
+  geom_line(color = "blue") +
+  geom_ribbon(data = ci_roc, aes(ymin = CI_low, ymax = CI_high), alpha = 0.2) +
+  labs(title = "Mean ROC Curve with 95% CI",
+       x = "False Positive Rate",
+       y = "True Positive Rate")
