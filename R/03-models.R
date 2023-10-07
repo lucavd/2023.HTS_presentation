@@ -381,7 +381,7 @@ for(i in seq_along(folds)){
   test_label <- label_vector[folds[[i]]]
   
   # Fit XGBoost model
-  xgb_model <- xgboost(data = train_data, label = train_label, nrounds = 100, objective = "binary:logistic")
+  xgb_model <- xgboost(data = train_data, label = train_label, nrounds = 1000, objective = "binary:logistic")
   
   # Predict probabilities on the test set
   pred_probs_xgb <- predict(xgb_model, newdata = test_data)
