@@ -1,3 +1,5 @@
+source('R/01-data_generation.R')
+
 # graphs ------------------------------------------------------------------
 
 # CORRELATED REPLICATES
